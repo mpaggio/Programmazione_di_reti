@@ -82,5 +82,54 @@ Le tuple sono immutabili (per modificarne i valori è necessario crearne una nuo
 #### Operatori di formato:
 
 
+## LEZIONE DI LABORATORIO 002:
+### DNS
+Il DNS è uno degli elementi costitutivi di Internet, che costituisce il database di informazioni, globale, che è responsabile della traduzione dei nomi simbolici in indirizzi e viceversa e dell'instradamento della posta alla destinazione corretta.
+
+### Resolver
+Il Resolver è la parte client del sistema, che pone le domande sui nomi degli host (di solito è una piccola libreria compilata in qualsiasi linguaggio, che richiede i servizi DNS e conosce quello che basta per inviare una query a un nameserver.
+
+### Nameserver
+Si tratta di un server software, che risponde alle query DNS (a volte conosce direttamente la risposta, se è "Autoritativo", mentre altre volte deve andare su Internet e chiedere in giro per trovare la risposta, se è "Ricorsivo").
+
+### Query flow
+1) Il sistema operativo tenta di risolvere localmente l'indirizzo (cercando nella chache locale), ma se la risposta non è disponibile, effettua una richiesta al RECURSIVE SERVER.
+2) Il RECURSIVE SERVER controlla la sua cache, se non trova il record, effettua una richiesta per nostro conto ad uno qualsiasi dei 13 ROOT SERVER.
+3) Se il ROOT SERVER non conosce la risposta alla nostra richiesta, invia un record al RECURSIVE SERVER, con un elenco dei Global Top Level Domain, ovvero i server responsabili di un dominio (sotto forma di record).
+4) Il RECURSIVE SERVER, utilizzando la risposta del ROOT SERVER, sceglie a caso uno dei server autoritativi GLTD e invia la stessa query. Se il server non conosce la risposta specifica alla domanda, restituisce un "REFERRAL" (un set di record) ad un server che con buona probabilità conosce la risposta.
+5) Il RECURSIVE NAMESERVER, sceglie a caso uno dei nameserver e invia una terqua query, uguale alle altre due già inviate.
+6) Ora che ha la risposta, il RECURSIVE NAMESERVER dell'ISP, consegna la risposta al client e soddisfa la query. Il RECURSIVE NAMESERVER archivia questa risposta nella propria cache, nel caso in cui questo o qualche altro client effettui la stessa query in un altro momento.
+7) Se la risposta non viene trovata entro un certo periodo, allora per evitare di essere continuamente sbalzati in giro fra i server, ci viene detto che è finito il tempo massimo disponibile per la ricerca e ci viene detto che quell'indirizzo non esiste.
+
+### DNS in Python
+- Bisogna scaricare e utilizzare la libreria `dns.resolver`.
+- Bisogna gestire le eccezioni tramite il comando `except` successivo al comando `try`.
+
+### Appunti vari
+La nostra macchina non ha in cache l'indirizzo di www.google.com, chiede quindi al server locale, poi lo chiede al root server, poi manda un IP che indirizza ad un altro server, altrimenti se questo non ha la risposta risponde con il nome del server autoritativo (ovvero .com), che se non ha l'indirizzo, allora non esiste, lo restituisce al nostro Nameserver ISP e ce lo fornisce.
+
+`Ip look up` ci fornisce il nome simbolico dell'indirizzo IP, fa la cosi detta "Query inversa".
+
+### Query inversa
+Immaginiamoci di avere un indirizzo IP (143.50.23.2), l'elemento più significativo è quello più a sinistra, mentre quello meno significativo sta a destra. Per fare la query inversa faccio il processo inverso, capovolgendo l'indirizzo (2.23.50.143) e vado a prendere il valore "[0]", perchè il risultato della operazione è una lista di elementi (pensiamo a quanti siti si possono visitare utilizzando svariati nomi per lo stesso indirizzo, ad esempio TIM.it, oppure TelecomItalia.it).
+- Si tratta di una lista di tutti i nomi simbolici associati ad uno stesso indirizzo IP.
+- Si utilizza il metodo `reversename.from_address('IP_ADDRESS')`.
+
+### LDAP
+Acronimo di Lightwight Directory Access Protocol, è un protoccollo di rete utilizzato per accedere e gestire le informazioni memorizzate in un servizio directory (ovvero una struttura di archiviazione che memorizza dati come nomi, indirizzi e altre informazioni). Quello che ci serve avere sono: permessi e identificativo di cosa stiamo cercando.
+1) LDAP Bind Request: tramite password chiedo di accedere a quella directory e mi viene detto Ok o Not Ok.
+2) LDAP Bind Responde:
+3) LDAP Search Request:
+4) LDAP Search Response:
+5) LDAP Unbind Request:
+In Python viene utilizzata la libreria `ldap`, per eseguire la ricerca LDAP.
+
+### Traceroute (Tracert)
+Si tratta di un Programma diagnostico, tramite il quale, scegliendo un server, inserito l'indirizzo IP dell'host di destinazione e dando invio, il server invia un certo numero di pacchetti speciali verso tale destinazione. Questi pacchetti attraversano vari router, quando un router ne riceve uno, invia un breve messaggio che torna all'origine (messaggio contenente il nome e l'IP adress del router che l'ha inviato). Ripete l'operazione per 3 volte consecutive.
+
+### TTL (Time To Live)
+Il TTL indica il numero massimo di Hop (ovvero di Step) che può compiere per riuscire a giungere all'indirizzo destinatario specificato. Indica il numero di router che può passare per arrivare all'indirizzo di destinazione. Il TTL limita la durata della "vita" dei dati in una rete IP. Ad ogni pacchetto di dati viene assegnato un valore TTL. Ogni volta che un pacchetto di dati raggiunge un salto, il valore TTL viene diminuito di uno.
+
+
 
 

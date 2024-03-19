@@ -1,0 +1,13 @@
+.) A --> B 
+.) F(trasmissione) = 1 Mbps (Megabit/sec) = Capacità trasmissiva di A
+.) v(propagazione) = 2*10^8 m/s
+.) quantità = 1000 bit
+.) tempo = 2ms (si trascurino il tempo di accodamento ed elaborazione)
+
+Si determini la lunghezza massima D del collegamento affinchè si possano avere questi dati:
+
+1) Il Tempo di Trasmissione è dato dalla formula: `T = L/R` (dove L è la lunghezza del pacchetto in bit, R è il "bit-rate" del router, ovvero il numero di bit trasmessi nell'unità di tempo, quindi la frequenza F).
+2) Il Tempo di Propagazione è dato dalla formula: `t = D/v` (dove D è la lunghezza del collegamento tra A e B, v è la velocità di propagazione del segnale sul collegamento fisico, di solito 2*10^8 m/s).
+3) Il Tempo Totale è dato dalla formula: `Ttot = Ttrasmissione + Tpropagazione` (ovvero quello che da noi è pari a 2 ms):
+    
+    2*10^-3 s = (1000 bit/ (1*10^6 bit/s)) + D/(2*10^8 m/s) ---> D = 200km
