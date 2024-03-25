@@ -125,52 +125,84 @@ Permettono di inserire dei valori numerici all'interno del testo stampato:
 
 ## ----------------------------------------------------------------------------------------------------------------------------------------------------------- ##
 ## LEZIONE DI LABORATORIO 002:
-### DNS
-Il DNS è uno degli elementi costitutivi di Internet, che costituisce il database di informazioni, globale, che è responsabile della traduzione dei nomi simbolici in indirizzi e viceversa e dell'instradamento della posta alla destinazione corretta.
+#### DNS
+- Il DNS (Domain Name System) è uno degli elementi costitutivi e fondamentali di Internet, che costituisce il database di informazioni, globale e distribuito, che è responsabile della traduzione dei nomi simbolici in indirizzi (e viceversa), dell'instradamento della posta alla destinazione corretta e di molti altri servizi.
+- E' lo schema mediante il quale milioni di Host Internet collaborano per rispondere alla domanda su come il nome Host si risolva in indirizzi IPv4 oppure IPv6 (nel caso sia utilizzata).
 
-### Resolver
-Il Resolver è la parte client del sistema, che pone le domande sui nomi degli host (di solito è una piccola libreria compilata in qualsiasi linguaggio, che richiede i servizi DNS e conosce quello che basta per inviare una query a un nameserver).
+#### Resolver
+- Il Resolver è la parte client del sistema client/server DNS, che pone le domande sugli "hostnames".
+- Di solito si tratta di una piccola libreria compilata in qualsiasi linguaggio, che richiede i servizi DNS e conosce quello che basta per inviare una query a un nameserver vicino. 
+- Solitamente sono delle strutture molto semplici, che si appoggiano ai server per svolgere il lavoro più pesante.
 
-### Nameserver
-Si tratta di un server software, che risponde alle query DNS (a volte conosce direttamente la risposta, se è "Autoritativo", mentre altre volte deve andare su Internet e chiedere in giro per trovare la risposta, se è "Ricorsivo").
+#### Nameserver (generico) 
+- Si tratta di un server software, che risponde alle query DNS.
+- Potrebbe conoscere già la risposta (in questo caso si dice che è "AUTORITATIVO"), oppure potrebbe dover andare su Internet e chiedere in giro per trovare la risposta (in questo caso, si dice che è "RICORSIVO").
 
-### Query flow
-1) Il sistema operativo tenta di risolvere localmente l'indirizzo (cercando nella chache locale), ma se la risposta non è disponibile, effettua una richiesta al RECURSIVE SERVER.
-2) Il RECURSIVE SERVER controlla la sua cache, se non trova il record, effettua una richiesta per nostro conto ad uno qualsiasi dei 13 ROOT SERVER.
-3) Se il ROOT SERVER non conosce la risposta alla nostra richiesta, invia un record al RECURSIVE SERVER, con un elenco dei Global Top Level Domain, ovvero i server responsabili di un dominio (sotto forma di record).
-4) Il RECURSIVE SERVER, utilizzando la risposta del ROOT SERVER, sceglie a caso uno dei server autoritativi GLTD e invia la stessa query. Se il server non conosce la risposta specifica alla domanda, restituisce un "REFERRAL" (un set di record) ad un server che con buona probabilità conosce la risposta.
-5) Il RECURSIVE NAMESERVER, sceglie a caso uno dei nameserver e invia una terqua query, uguale alle altre due già inviate.
-6) Ora che ha la risposta, il RECURSIVE NAMESERVER dell'ISP, consegna la risposta al client e soddisfa la query. Il RECURSIVE NAMESERVER archivia questa risposta nella propria cache, nel caso in cui questo o qualche altro client effettui la stessa query in un altro momento.
-7) Se la risposta non viene trovata entro un certo periodo, allora per evitare di essere continuamente sbalzati in giro fra i server, ci viene detto che è finito il tempo massimo disponibile per la ricerca e ci viene detto che quell'indirizzo non esiste.
+#### Nameserver Ricorsivo
+- Un "Resolver Ricorsivo" è la prima fermata in una query DNS.
+- Si tratta di un server software, che funge da intermediario tra un client e un Nameserver DNS.
+- Dopo aver ricevuto una query DNS, risponde con i dati memorizzati nella cache, oppure invierà una richiesta ad un "ROOT NAMESERVER", seguita da una richiesta ad un "TLD NAMESERVER" e da un'ultima richiesta al "NAMESERVER AUTORITATIVO", il quale fornirà l'indirizzo IP richiesto. Il Recursive Nameserver invierà poi questa risposta al client. 
 
-### DNS in Python
+#### Nameserver Autoritativo
+- Per ogni zona, qualcuno deve mantenere un file contenente le associazioni Hostname e indirizzi IP.
+- Questa funzione amministrativa viene eseguita da un umano e il file è contenuto su una macchina, chiamata "ZONE MASTER".
+
+#### Registro delle risorse
+- Si potrebbe pensare che il DNS fornisca solamente la mappatura Hostname-IP, ma in realtà ci sono altri tipi di query che possono essere poste ad un DNS.
+- Il DNS è in realtà un Database ricco di risorse.
+- Il tipo più comune di registro è il tipo `A`, ovvero quello degli indirizzi IP (viene utilizzato un Hostname per ricevere un indirizzo IPv4), ma esistono anche altri tipi di record, ad esempio quelli di tipo `AAAA` (che invece di fornire un IPv4, fornisce un indirizzo IPv6), quelli di tipo `MX` (che maneggiano e gestiscono le email per il dominio specificato) e altri ancora. 
+
+#### Query flow
+1) Il sistema operativo tenta di risolvere localmente l'indirizzo, cercando nella chache locale. Se la risposta non è disponibile, allora effettua una richiesta al RECURSIVE SERVER, che controlla la sua cache.
+2) Se il Recursive Server non trova il record, effettua una richiesta per nostro conto ad uno qualsiasi dei 13 ROOT SERVER.
+3) Se il Root Server non conosce la risposta alla nostra richiesta, invia un record al nostro RECURSIVE SERVER, con un elenco dei "Global Top Level Domain" (GTLD), ovvero i server responsabili di un dominio (ad esempio `.com`, `.net`, `.org`, ...).
+4) Il Recursive Server, utilizzando la risposta del Root Server, sceglie a caso uno dei SERVER AUTORITATIVI GLTD e invia la stessa query. Se il server non conosce la risposta specifica alla nostra domanda, restituisce un `referral` (un set di record) ad un altro server, che con buona probabilità conosce la risposta.
+5) Il Recursive Server, seguendo una catena di risposte per conto del client, sceglie a caso uno dei nameserver e invia una terza query, uguale alle altre due.
+6) Ora che ha la risposta, il Recursive Nameserver dell'ISP, consegna la risposta al client e soddisfa la query. Il Recursive Nameserver archivia questa risposta nella propria cache (nel caso in cui questo o qualche altro client effettui la stessa query in un altro momento).
+
+#### --- Osservazione (1)
+Se la risposta non viene trovata entro un certo periodo, allora per evitare di essere continuamente sbalzati in giro fra i server, ci viene detto che è finito il tempo massimo disponibile per la ricerca e ci viene detto che quell'indirizzo non esiste.
+
+#### DNS in Python
 - Bisogna scaricare e utilizzare la libreria `dns.resolver`.
-- Bisogna gestire le eccezioni tramite il comando `except` successivo al comando `try`.
+- La funzione realizzata a laboratorio della query DNS, accetta il nome di dominio come parametro, eseguendo la query DNS mediante il comando `.resolve()`, per ottenere gli indirizzi IP associati al dominio (stampando quelli ottenuti).
+- Bisogna gestire le eccezioni attraverso gli Except Blocks, tramite il comando `except`, per gestire tutti i casi in cui si possono verificare delle risposte di errore o non contenenti la risposta desiderata (il tutto, successivo al comando `try`, che esprime il comando di provare a fare quella serie di istruzioni, vedendo se si incappa in delle eccezioni).
 
-### Appunti vari
+#### --- Osservazione (2)
 La nostra macchina non ha in cache l'indirizzo di www.google.com, chiede quindi al server locale, poi lo chiede al root server, poi manda un IP che indirizza ad un altro server, altrimenti se questo non ha la risposta risponde con il nome del server autoritativo (ovvero .com), che se non ha l'indirizzo, allora non esiste, lo restituisce al nostro Nameserver ISP e ce lo fornisce.
 
-`Ip look up` ci fornisce il nome simbolico dell'indirizzo IP, fa la cosi detta "Query inversa".
+#### Query DNS Inversa
+- `Ip look up` ci fornisce i nomi simbolici relativi ad un indirizzo IP specificato, ovvero fa la così detta "Query inversa".
+- La risoluzione DNS inversa (rDNS) è la determinazione di un nome di dominio associato ad un indirizzo IP, tramite l'interrogazione del DNS.
+- Le ricerche inverse per gli indirizzi IPv4, utilizzano il dominio speciale `in-addr.arpa`, in cui un indirizzo è rappresentato come una sequenza concatenata di quattro numeri decimali, separati da punti, a cui è aggiunto il suffisso di dominio di secondo livello `.in-addr.arpa` (i numeri decimali si ottengono dividendo l'indirizzo a 32 bit, in quattro porzioni da 8 bit e convertendo ciascuna porzione in un valore decimale).  
+- Immaginiamoci di avere un indirizzo IP (143.50.23.2), l'elemento MENO SIGNIFICATIVO è quello più a sinistra, mentre quello PIU' SIGNIFICATIVO sta a destra. 
+- Per fare la query inversa faccio il processo inverso, capovolgendo l'indirizzo (2.23.50.143) e vado a prendere il valore "[0]", perchè il risultato della operazione è una lista di di tutti i nomi simbolici associati ad uno stesso indirizzo IP (pensiamo a quanti siti si possono visitare utilizzando svariati nomi per lo stesso indirizzo, ad esempio TIM.it, oppure TelecomItalia.it).
+- Si utilizza il metodo `reversename.from_address('IP_ADDRESS')`, dovendo importare `dns.reversename`.
 
-### Query inversa
-Immaginiamoci di avere un indirizzo IP (143.50.23.2), l'elemento più significativo è quello più a sinistra, mentre quello meno significativo sta a destra. Per fare la query inversa faccio il processo inverso, capovolgendo l'indirizzo (2.23.50.143) e vado a prendere il valore "[0]", perchè il risultato della operazione è una lista di elementi (pensiamo a quanti siti si possono visitare utilizzando svariati nomi per lo stesso indirizzo, ad esempio TIM.it, oppure TelecomItalia.it).
-- Si tratta di una lista di tutti i nomi simbolici associati ad uno stesso indirizzo IP.
-- Si utilizza il metodo `reversename.from_address('IP_ADDRESS')`.
+#### LDAP
+- Acronimo di Lightweight Directory Access Protocol, è un protoccollo di rete utilizzato per accedere e gestire le informazioni memorizzate in un servizio directory (ovvero una struttura di archiviazione che memorizza dati come: nomi, indirizzi, ...). 
+- LDAP è leggero, perchè è progettato per essere efficiente in termini di risorse e semplice da implementare. 
+- Viene spesso utilizzato per autenticazione, ricerca e recupero di informazioni di utenti e risorse in una rete.
+- Descrizione di un'interazione classica tra client e server LDAP:
+    1) CONNESSIONE: Il client LDAP stabilisce una connessione TCP/IP con il server LDAP (il protocollo LDAP utilizza la porta 389 per le connessioni non crittografate e la porta 636, per crittografia tramite SSL/TLS)
+    2) AUTENTICAZIONE: Se richiesta, il client si autentica presso il server LDAP (può essere fatto tramite diversi meccanismi di autenticazione, come le credenziali di base, certificati client, ...).
+    3) OPERAZIONI DI RICERCA/MODIFICA: Dopo aver stabilito la connessione e l'autenticazione, il client può inviare varie operazioni al server LDAP (le operazioni più comuni sono quelle di `RICERCA`, dove il client invia una query di ricerca, specificando la base di ricerca, il filtro e gli attributi da recuperare, di `AGGIUNTA`, dove il client invia una richiesta per aggiungere un nuovo oggetto alla directory LDAP, oppure di `ELIMINAZIONE`, dove il client invia una richiesta per eliminare un oggetto dalla directory).
+    4) RISPOSTA DEL SERVER: Il server LDAP elabora le richieste ricevute dal client e invia le risposte appropriate (le risposte contengono i risultati delle operazioni richieste dal client).
+    5) CHIUSURA DELLA CONNESSIONE: Alla fine dell'interazione, il client e il server LDAP, possono decidere di chiudere la connessione (solitamente dopo che tutte le operazioni richieste sono state completate con successo o in caso di errore).
+- In Python viene utilizzata la libreria `ldap`, per eseguire la ricerca LDAP.
 
-### LDAP
-Acronimo di Lightwight Directory Access Protocol, è un protoccollo di rete utilizzato per accedere e gestire le informazioni memorizzate in un servizio directory (ovvero una struttura di archiviazione che memorizza dati come nomi, indirizzi e altre informazioni). Quello che ci serve avere sono: permessi e identificativo di cosa stiamo cercando.
-1) LDAP Bind Request: tramite password chiedo di accedere a quella directory e mi viene detto Ok o Not Ok.
-2) LDAP Bind Responde:
-3) LDAP Search Request:
-4) LDAP Search Response:
-5) LDAP Unbind Request:
-In Python viene utilizzata la libreria `ldap`, per eseguire la ricerca LDAP.
+#### Traceroute (Tracert)
+- Si tratta di un Programma diagnostico, tramite il quale, scegliendo un server, inserito l'indirizzo IP dell'host di destinazione e dando invio, il server invia un certo numero di pacchetti speciali verso tale destinazione. Questi pacchetti attraversano vari router, quando un router ne riceve uno, invia un breve messaggio che torna all'origine (messaggio contenente il nome e l'IP adress del router che l'ha inviato). Ripete l'operazione per 3 volte consecutive.
+- Garantisce che ad ogni salto nel percorso verso un dispositivo destinazione, venga rilasciato un pacchetto e venga restituito un messaggio di errore ICMP (in questo modo è in grado di misurare quando tempo passa tra il momento in cui i dati vengono inviati e il momento in cui il messaggio ICMP viene ricevuto di nuovo, per ogni hop, fornendo il valore RTT per ogni hop).
 
-### Traceroute (Tracert)
-Si tratta di un Programma diagnostico, tramite il quale, scegliendo un server, inserito l'indirizzo IP dell'host di destinazione e dando invio, il server invia un certo numero di pacchetti speciali verso tale destinazione. Questi pacchetti attraversano vari router, quando un router ne riceve uno, invia un breve messaggio che torna all'origine (messaggio contenente il nome e l'IP adress del router che l'ha inviato). Ripete l'operazione per 3 volte consecutive.
+#### TTL (Time To Live)
+- Il TTL limita la durata massima della vita dei dati in una rete IP.
+- Ad ogni pacchetto dati, viene assegnato un valore TTL, dove ogni volta che il pacchetto raggiunge un salto, il valore TTL viene diminuito di uno (quando arriva a 0, vuol dire che il suo tempo di vita è terminato, nel caso in cui non sia arrivato a destinazione in tempo).
+- indica il numero massimo di Hop (ovvero di Step) che può compiere per riuscire a giungere all'indirizzo destinatario specificato. 
+- Indica il numero di Router che può passare per arrivare all'indirizzo di destinazione. 
 
-### TTL (Time To Live)
-Il TTL indica il numero massimo di Hop (ovvero di Step) che può compiere per riuscire a giungere all'indirizzo destinatario specificato. Indica il numero di router che può passare per arrivare all'indirizzo di destinazione. Il TTL limita la durata della "vita" dei dati in una rete IP. Ad ogni pacchetto di dati viene assegnato un valore TTL. Ogni volta che un pacchetto di dati raggiunge un salto, il valore TTL viene diminuito di uno.
+#### RTT (Round Trip Time)
+- Rappresenta il tempo di andata e di ritorno di un pacchetto di una rete IP.
 
 
 
