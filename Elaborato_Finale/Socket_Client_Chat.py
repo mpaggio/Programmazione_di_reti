@@ -38,7 +38,7 @@ def on_closing(event = None):
 
 # Connessione al server:
 serverHost = input("Inserire server host:")
-serverPort = input("Inserire server port:")
+serverPort = int(input("Inserire server port:"))
 serverAddress = (serverHost, serverPort)
 clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect(serverAddress)
