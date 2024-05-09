@@ -25,6 +25,9 @@ def handle(client):
     # Si mette in ascolto del thread del singolo Client e gestisce l'invio dei messaggi e l'uscita dalla chat
     while True:
         try:
+            # Imposta un timeout di 10 secondi al Client
+            client.settimeout(10)
+            # Attende di ricevere il messaggio
             message = client.recv(1024)
             # Verifico che il messaggio non sia quello di uscita
             if message != "quit".encode("utf-8"):
@@ -45,7 +48,18 @@ def handle(client):
                 broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
                 break
 
-        except Exception as exception:
+        except timeout:
+            print(f'{nickname} non è più connesso.')
+            client.close()
+            # Aggiorna le liste dei Client e dei rispettivi nickname
+            index = clients.index(client)
+            clients.remove(client)
+            nickname = nicknames[index]
+            nicknames.remove(nickname)
+            broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+            break
+
+        except Exception:
             break
             
             

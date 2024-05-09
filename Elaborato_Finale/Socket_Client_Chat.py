@@ -3,6 +3,20 @@
 from socket import *
 from threading import *
 import tkinter as tk
+import time
+
+# Funzione che manda costantemente (ogni 3 secondi) un segnale al server:
+def ping(client):
+    while True:
+        try:
+            # Aspetta per 3 secondi
+            time.sleep(3)
+            # Invia il messaggio ping al server
+            client.send("ping".encode("utf-8"))
+        except:
+             # Se c'è un errore (la connessione è interrota) allora si interrompe
+             break
+     
 
 # Funzione che gestisce l'invio dei messaggi:
 def send_message(event = None):
@@ -74,6 +88,10 @@ send_button = tk.Button(window, text="Invio", command=send_message)
 send_button.pack()
 
 window.protocol("WM_DELETE_WINDOW", on_closing)
+
+# Creazione del Thread che si occupa di mandare il ping al Server
+pingThread = Thread(target=ping, args=(clientSocket,))
+pingThread.start()
 
 # Creazione del Thread che si occupa di ricevere i messaggi del Client
 receiveThread = Thread(target=receive, args=(clientSocket,))
