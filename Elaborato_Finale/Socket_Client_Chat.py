@@ -13,7 +13,7 @@ def ping(client):
             time.sleep(3)
             # Invia il messaggio ping al server
             client.send("ping".encode("utf-8"))
-            print(f"Sent ping to {client}")
+            print(f"Sent ping")
         except:
              # Se c'è un errore (la connessione è interrota) allora si interrompe
              break

@@ -10,17 +10,20 @@ def broadcast(message, clients):
 
 # Funzione che gestisce la connessione di un singolo Client (il cui socket viene passato come argomento):
 def handle(client):
-    # Salva il nome del client che gli viene passato come primo messaggio
-    nickname = client.recv(1024).decode("utf-8")
-    # Salviamo le informazioni del Client nelle liste create in precedenza 
-    nicknames.append(nickname)
-    clients.append(client)
-    # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
-    print(f'Nickname: {nickname}')
-    # Breve messaggio di benvenuto e indicazioni sull'uscita dalla chat
-    client.send(f'Benvenuto {nickname}! Se vuoi lasciare la chat, scrivi \"quit\" per uscire.'.encode("utf-8"))
-    # Messaggio brodcast con cui tutti i Client connessi alla chat vengono avvisati che l'utente è entrato
-    broadcast(f'{nickname} si è unito alla chat!'.encode("utf-8"), clients)
+    while True:
+        # Salva il nome del client che gli viene passato come primo messaggio
+        nickname = client.recv(1024).decode("utf-8")
+        # Salviamo le informazioni del Client nelle liste create in precedenza 
+        if nickname != "ping":
+            nicknames.append(nickname)
+            clients.append(client)
+            # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
+            print(f'Nickname: {nickname}')
+            # Breve messaggio di benvenuto e indicazioni sull'uscita dalla chat
+            client.send(f'Benvenuto {nickname}! Se vuoi lasciare la chat, scrivi \"quit\" per uscire.'.encode("utf-8"))
+            # Messaggio brodcast con cui tutti i Client connessi alla chat vengono avvisati che l'utente è entrato
+            broadcast(f'{nickname} si è unito alla chat!'.encode("utf-8"), clients)
+            break
 
     # Si mette in ascolto del thread del singolo Client e gestisce l'invio dei messaggi e l'uscita dalla chat
     while True:
