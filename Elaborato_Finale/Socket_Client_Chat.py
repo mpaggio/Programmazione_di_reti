@@ -39,9 +39,11 @@ def receive(client):
                 message = client.recv(1024).decode("utf-8")
                 message_list.insert(tk.END, message + '\n')
                 print(message)
-                if message == "quit":
+                if message == "":
+                    print("Il server ha terminato la connessione a causa di un errore")
                     clientSocket.close()
                     window.quit()
+                    break
 
             # Controllo degli errori
             except OSError:
