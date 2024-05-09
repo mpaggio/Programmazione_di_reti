@@ -1,0 +1,26 @@
+print("The web server is up on port:", serverPort)
+while True:
+    
+    print("Ready to serve ...")
+    clientSocket, clientAddress = serverSocket.accept()
+    print("Serving ", clientAddress, " with socket ", clientSocket)
+ 
+    try:
+        message = clientSocket.recv(1024).decode()
+        print("\n\n***** CHAT CON UTENTE CLIENT ******\n")
+        print("Client: ", message)
+    except Exception as exception_message:
+        print(exception_message)
+    
+    while message != "exit":
+        response = input("Io: ")         
+        clientSocket.send(response.encode())
+        
+        try:
+            message = clientSocket.recv(1024).decode()
+            print("Client: ", message)
+        except Exception as exception_message:
+            print(exception_message)
+            
+    print("\n")
+    clientSocket.close()

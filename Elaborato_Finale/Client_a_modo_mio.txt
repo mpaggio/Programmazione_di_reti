@@ -1,0 +1,27 @@
+if len(sys.argv) != 4:
+    print (len(sys.argv))
+    print("Il comando non è corretto. Usa il seguente formato: client.py indirizzo_ip_del_server_web porta_del_server")
+    sys.exit(0)
+
+serverAddress = str(sys.argv[2])
+serverPort = int(sys.argv[3])
+
+try:
+    clientSocket.connect((serverAddress, serverPort))
+except Exception as exception_message:
+    print(exception_message)
+    print("Ritenta, sarai più fortunato")
+    sys.exit(0)
+
+print("\n\n****** CHAT CON UTENTE SERVER ******\n")
+print("Digitare \"exit\" se si desidera uscire dalla chat")
+message = input("Io: ")
+
+while message != "exit":
+    clientSocket.send(message.encode())
+    response = clientSocket.recv(1024)
+    print("Server: ", response.decode())
+    message = input("Io: ")
+    
+clientSocket.send(message.encode())
+clientSocket.close()
