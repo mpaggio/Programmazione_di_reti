@@ -12,7 +12,7 @@ def ping(client):
             # Aspetta per 3 secondi
             time.sleep(3)
             # Invia il messaggio ping al server
-            client.send("ping".encode("utf-8"))
+            client.send("[ping]".encode("utf-8"))
             print(f"Sent ping")
         except:
              # Se c'è un errore (la connessione è interrota) allora si interrompe
@@ -28,7 +28,7 @@ def send_message(event = None):
         input_area.delete(0, tk.END)
         # Invia il messaggio sul socket
         clientSocket.send(messaggio.encode("utf-8"))
-        if messaggio == "quit":
+        if messaggio == "[quit]":
             clientSocket.close()
             window.quit()
 
@@ -54,7 +54,7 @@ def receive(client):
 
 # Funzione che viene invocata quando viene chiusa la finestra della chat:
 def on_closing(event = None):
-      input_area_message.set("quit")
+      input_area_message.set("[quit]")
       send_message()
 
 

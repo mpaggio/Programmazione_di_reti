@@ -14,13 +14,13 @@ def handle(client):
         # Salva il nome del client che gli viene passato come primo messaggio
         nickname = client.recv(1024).decode("utf-8")
         # Salviamo le informazioni del Client nelle liste create in precedenza 
-        if nickname != "ping":
+        if nickname != "[ping]":
             nicknames.append(nickname)
             clients.append(client)
             # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
             print(f'Nickname: {nickname}')
             # Breve messaggio di benvenuto e indicazioni sull'uscita dalla chat
-            client.send(f'Benvenuto {nickname}! Se vuoi lasciare la chat, scrivi \"quit\" per uscire.'.encode("utf-8"))
+            client.send(f'Benvenuto {nickname}! Se vuoi lasciare la chat, scrivi \"[quit]\" per uscire.'.encode("utf-8"))
             # Messaggio brodcast con cui tutti i Client connessi alla chat vengono avvisati che l'utente è entrato
             broadcast(f'{nickname} si è unito alla chat!'.encode("utf-8"), clients)
             break
@@ -33,13 +33,13 @@ def handle(client):
             # Attende di ricevere il messaggio
             message = client.recv(1024).decode("utf-8")
             # Verifico che il messaggio non sia quello di uscita
-            if message != "ping":
-                if message != "quit":
+            if message != "[ping]":
+                if message != "[quit]":
                     total_message = nickname + ": " + message
                     broadcast(total_message.encode("utf-8"), clients)
                 else:
                     # Scrive al Client che ha abbandonato la chat
-                    client.send("quit".encode("utf-8"))
+                    client.send("[quit]".encode("utf-8"))
                     # Chiude la connessione con il Client
                     client.close()
                     # Aggiorna le liste dei Client e dei rispettivi nickname
@@ -50,6 +50,8 @@ def handle(client):
                     # Scrive un messaggio a tutti i Client rimanenti, che il Client ha abbandonato la chat
                     broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
                     break
+            else:
+                print("Ping arrived")
 
         except timeout:
             print(f'{nickname} non è più connesso.')
