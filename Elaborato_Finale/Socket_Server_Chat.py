@@ -28,25 +28,25 @@ def handle(client):
             # Imposta un timeout di 10 secondi al Client
             client.settimeout(10)
             # Attende di ricevere il messaggio
-            message = client.recv(1024)
+            message = client.recv(1024).decode("utf-8")
             # Verifico che il messaggio non sia quello di uscita
-            if message != "quit".encode("utf-8"):
-                message = message.decode("utf-8")
-                message = nickname + ": " + message
-                broadcast(message.encode("utf-8"), clients)
-            else:
-                # Scrive al Client che ha abbandonato la chat
-                client.send("quit".encode("utf-8"))
-                # Chiude la connessione con il Client
-                client.close()
-                # Aggiorna le liste dei Client e dei rispettivi nickname
-                index = clients.index(client)
-                clients.remove(client)
-                nickname = nicknames[index]
-                nicknames.remove(nickname)
-                # Scrive un messaggio a tutti i Client rimanenti, che il Client ha abbandonato la chat
-                broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
-                break
+            if message != "ping":
+                if message != "quit":
+                    total_message = nickname + ": " + message
+                    broadcast(total_message.encode("utf-8"), clients)
+                else:
+                    # Scrive al Client che ha abbandonato la chat
+                    client.send("quit".encode("utf-8"))
+                    # Chiude la connessione con il Client
+                    client.close()
+                    # Aggiorna le liste dei Client e dei rispettivi nickname
+                    index = clients.index(client)
+                    clients.remove(client)
+                    nickname = nicknames[index]
+                    nicknames.remove(nickname)
+                    # Scrive un messaggio a tutti i Client rimanenti, che il Client ha abbandonato la chat
+                    broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+                    break
 
         except timeout:
             print(f'{nickname} non è più connesso.')
