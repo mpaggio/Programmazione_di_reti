@@ -63,7 +63,7 @@ def receive(server, clients, nicknames):
 
 # Creazione dell'indirizzo del Server:
 serverHost = input("Inserisci server host:")
-serverPort = input("Inserisci server port:")
+serverPort = int(input("Inserisci server port:"))
 serverAddress = (serverHost, serverPort)
 
 # Creazione della Socket Server:
