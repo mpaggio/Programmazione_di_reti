@@ -47,7 +47,9 @@ def receive(client):
 
             # Controllo degli errori
             except OSError:
-                print("quit")
+                print("Il server ha terminato la connessione a causa di un errore")
+                clientSocket.close()
+                window.quit()
                 break 
 
 # Funzione che viene invocata quando viene chiusa la finestra della chat:
