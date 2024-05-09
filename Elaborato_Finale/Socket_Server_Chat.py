@@ -14,7 +14,7 @@ def handle(client):
         # Salva il nome del client che gli viene passato come primo messaggio
         nickname = client.recv(1024).decode("utf-8")
         # Salviamo le informazioni del Client nelle liste create in precedenza 
-        if nickname.contains("[ping]") == False:
+        if "[ping]" not in nickname:
             nicknames.append(nickname)
             clients.append(client)
             # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
@@ -33,7 +33,7 @@ def handle(client):
             # Attende di ricevere il messaggio
             message = client.recv(1024).decode("utf-8")
             # Verifico che il messaggio non sia quello di uscita
-            if message.contains("[ping]") == False:
+            if "[ping]" not in message:
                 if message != "[quit]":
                     total_message = nickname + ": " + message
                     broadcast(total_message.encode("utf-8"), clients)
