@@ -62,8 +62,8 @@ def receive(server, clients, nicknames):
         thread.start()
 
 # Creazione dell'indirizzo del Server:
-serverHost = 'localhost'
-serverPort = 55555
+serverHost = input("Inserisci server host:")
+serverPort = input("Inserisci server port:")
 serverAddress = (serverHost, serverPort)
 
 # Creazione della Socket Server:
