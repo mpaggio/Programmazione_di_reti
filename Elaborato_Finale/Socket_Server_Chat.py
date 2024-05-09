@@ -2,6 +2,16 @@
 
 from socket import *
 from threading import *
+import signal
+import sys
+
+def signal_handler(sig, frame):
+    print("Hai premuto Ctrl+C!")
+    for client in clients:
+        client.close()
+    print("Tutti i client sono stati disconnessi")
+    sys.exit(0)
+
 
 # Funzione che invia un messaggio in broadcast a tutti i Client:
 def broadcast(message, clients):
@@ -47,6 +57,7 @@ def handle(client):
                     clients.remove(client)
                     nickname = nicknames[index]
                     nicknames.remove(nickname)
+                    print(f"Rimosso {nickname} dalla chat")
                     # Scrive un messaggio a tutti i Client rimanenti, che il Client ha abbandonato la chat
                     broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
                     break
@@ -95,6 +106,7 @@ clients = []
 nicknames = []
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
     acceptThread = Thread(target=receive, args=(serverSocket, clients, nicknames))
     acceptThread.start()
     acceptThread.join()
