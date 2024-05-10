@@ -4,6 +4,7 @@ from socket import *
 from threading import *
 import signal
 import sys
+import time
 
 def signal_handler(sig, frame):
     print("Hai premuto Ctrl+C!")
@@ -30,7 +31,7 @@ def handle(client):
             # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
             print(f'Nickname: {nickname}')
             # Breve messaggio di benvenuto e indicazioni sull'uscita dalla chat
-            client.send(f'Benvenuto {nickname}! Se vuoi lasciare la chat, scrivi \"[quit]\" per uscire.'.encode("utf-8"))
+            client.send(f'Benvenuto {nickname}! \nSe vuoi lasciare la chat, scrivi \"[quit]\" per uscire.'.encode("utf-8"))
             # Messaggio brodcast con cui tutti i Client connessi alla chat vengono avvisati che l'utente è entrato
             broadcast(f'{nickname} si è unito alla chat!'.encode("utf-8"), clients)
             break
@@ -60,6 +61,9 @@ def handle(client):
                     print(f"Rimosso {nickname} dalla chat")
                     # Scrive un messaggio a tutti i Client rimanenti, che il Client ha abbandonato la chat
                     broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+                    print("Nickname dei Client rimanenti nella chat:\n ")
+                    for nick in nicknames:
+                        print(nick) 
                     break
             else:
                 print("Ping arrived")
@@ -73,6 +77,9 @@ def handle(client):
             nickname = nicknames[index]
             nicknames.remove(nickname)
             broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+            print("Nickname dei Client rimanenti nella chat:\n ")
+            for nick in nicknames:
+                print(nick) 
             break
 
         except Exception:
@@ -83,13 +90,17 @@ def handle(client):
 # Funzione che accetta le connessioni dei client in entrata:
 def receive(server, clients, nicknames):
     while True:
-        client, clientAddress = serverSocket.accept()
-        print(f'Connesso con {str(clientAddress)}')
-        # Al client appena connesso specifichiamo una prima indicazione su cosa fare (scrivere il nickname e dare invio)
-        client.send('Digita il tuo nickname e premi invio'.encode("utf-8"))
-        # Diamo inizio all'attività di gestione dei Client mediante un Thread (uno per ogni Client)
-        thread = Thread(target=handle, args=(client,))
-        thread.start()
+        try:
+            client, clientAddress = serverSocket.accept()
+            print(f'Connesso con {str(clientAddress)}')
+            # Al client appena connesso specifichiamo una prima indicazione su cosa fare (scrivere il nickname e dare invio)
+            client.send('Digita il tuo nickname e premi invio'.encode("utf-8"))
+            # Diamo inizio all'attività di gestione dei Client mediante un Thread (uno per ogni Client)
+            thread = Thread(target=handle, args=(client,))
+            thread.start()
+        except Exception:
+            print("Server disconnesso")
+            break
 
 # Creazione dell'indirizzo del Server:
 serverHost = input("Inserisci server host:")
@@ -106,8 +117,24 @@ clients = []
 nicknames = []
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal_handler)
+    
+    #signal.signal(signal.SIGINT, signal_handler)
     acceptThread = Thread(target=receive, args=(serverSocket, clients, nicknames))
     acceptThread.start()
-    acceptThread.join()
-    serverSocket.close()
+    print("In attesa di connessioni ...")
+    #acceptThread.join()
+    #serverSocket.close()
+    
+    while True:
+        try: 
+            time.sleep(5)
+            print("Server in esecuzione")
+        except KeyboardInterrupt:
+            print("Avviata procedura di chiusura del Server ... (CTRL+C)")
+            for client in clients:
+                client.send("Sei stato disconnesso a causa della chiusura inaspettata del Server".encode("utf-8"))
+                client.close()
+            print("Tutti i client sono stati disconnessi")
+            serverSocket.close()
+            print("Server disconnesso")
+            sys.exit(0)

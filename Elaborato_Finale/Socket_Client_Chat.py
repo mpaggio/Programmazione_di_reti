@@ -42,7 +42,7 @@ def receive(client):
 
             # Controllo degli errori
             except OSError:
-                print("Il server ha terminato la connessione a causa di un errore")
+                print("Connessione terminata")
                 clientSocket.close()
                 window.quit()
                 break 
