@@ -21,6 +21,7 @@ def ping(client):
                 client.send("[ping]".encode("utf-8"))
                 print("[System]: Sent ping")
             else:
+                 print("----- Terminato il PING THREAD -------")
                  break
             
         except:
@@ -30,14 +31,17 @@ def ping(client):
 
 # Funzione che gestisce l'invio dei messaggi:
 def send_message(event = None):
+        global socket_open
         # Creiamo il messaggio prendendolo dalla casella in cui viene inserito (attaccandoci il nickname del Client)
         messaggio = input_area_message.get()
         input_area_message.set("")
         # Libera la casella di inserimento del messaggio
         input_area.delete(0, tk.END)
         # Invia il messaggio sul socket
-        clientSocket.send(messaggio.encode("utf-8"))
+        if socket_open == True:
+            clientSocket.send(messaggio.encode("utf-8"))
         if messaggio == "[quit]":
+            socket_open = False
             clientSocket.close()
             window.quit()
 
@@ -46,12 +50,13 @@ def receive(client):
     global socket_open
     while True:
             try:
-                # Imposta un timeout di 10 secondi al Server
-                client.settimeout(10)
                 if socket_open == True:
+                    # Imposta un timeout di 10 secondi al Server
+                    client.settimeout(10)
                     message = client.recv(1024).decode("utf-8")
                     if message == "[quit]":
                          print("Disconnessione in corso a causa della chiusura del Server ...")
+                         socket_open = False
                          clientSocket.close()
                          window.quit()
                     elif "[ping]" not in message:
@@ -60,6 +65,7 @@ def receive(client):
                     else:
                         print("[System]: Server ping received")
                 else:
+                     print("------ Terminato il RECEIVE THREAD ------")
                      break
 
             # Controllo degli errori
@@ -67,12 +73,13 @@ def receive(client):
                 socket_open = False
                 clientSocket.close()
                 print('Il Server non è più attivo quindi sei stato disconnesso')
-                window.quit() 
+                window.quit()
+                print("------ Terminato il RECEIVE THREAD ------")
                 break
 
-            except OSError:
+            except Exception:
                 socket_open = False
-                print("Disconnessione in corso ...")
+                print("Abbiamo rilevato un problema, chiusura in corso ...")
                 clientSocket.close()
                 window.quit()
                 break 
