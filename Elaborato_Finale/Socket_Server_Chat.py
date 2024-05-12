@@ -143,7 +143,7 @@ if __name__ == "__main__":
             print("Avviata procedura di chiusura del Server ... (CTRL+C)")
             for client in clients:
                 print("Disconnettendo: ", client)
-                client.send("Sei stato disconnesso a causa della chiusura inaspettata del Server".encode("utf-8"))
+                #client.send("Sei stato disconnesso a causa della chiusura inaspettata del Server".encode("utf-8"))
                 client.send("[quit]".encode("utf-8"))
                 client.close()
             print("Tutti i client sono stati disconnessi")
