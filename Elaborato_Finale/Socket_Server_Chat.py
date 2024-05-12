@@ -142,10 +142,13 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("Avviata procedura di chiusura del Server ... (CTRL+C)")
             for client in clients:
+                print("Disconnettendo: ", client)
                 client.send("Sei stato disconnesso a causa della chiusura inaspettata del Server".encode("utf-8"))
                 client.send("[quit]".encode("utf-8"))
                 client.close()
             print("Tutti i client sono stati disconnessi")
+            clients = []
+            nicknames = []
             serverSocket.close()
             print("Server disconnesso")
             sys.exit(0)

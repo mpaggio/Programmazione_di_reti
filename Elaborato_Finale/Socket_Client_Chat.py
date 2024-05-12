@@ -50,7 +50,11 @@ def receive(client):
                 client.settimeout(10)
                 if socket_open == True:
                     message = client.recv(1024).decode("utf-8")
-                    if "[ping]" not in message:
+                    if message == "[quit]":
+                         print("Disconnessione in corso a causa della chiusura del Server ...")
+                         clientSocket.close()
+                         window.quit()
+                    elif "[ping]" not in message:
                         message_list.insert(tk.END, message + '\n')
                         print(message)
                     else:
