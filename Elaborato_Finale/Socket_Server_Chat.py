@@ -6,12 +6,22 @@ import signal
 import sys
 import time
 
-def signal_handler(sig, frame):
-    print("Hai premuto Ctrl+C!")
-    for client in clients:
-        client.close()
-    print("Tutti i client sono stati disconnessi")
-    sys.exit(0)
+# Funzione che manda costantemente (ogni 3 secondi) un segnale al server:
+def ping(client):
+    while True:
+        try:
+            # Aspetta per 3 secondi
+            time.sleep(3)
+            if client.fileno() != -1:
+                # Invia il messaggio ping al server
+                client.send("[ping]".encode("utf-8"))
+                print("[System]: Sent ping")
+            else:
+                break
+
+        except:
+             # Se c'è un errore (la connessione è interrota) allora si interrompe
+             break
 
 
 # Funzione che invia un messaggio in broadcast a tutti i Client:
@@ -31,7 +41,7 @@ def handle(client):
             # Messaggio interno al Server che tiene traccia della registrazione del nome del Client
             print(f'Nickname: {nickname}')
             # Breve messaggio di benvenuto e indicazioni sull'uscita dalla chat
-            client.send(f'Benvenuto {nickname}! \nSe vuoi lasciare la chat, scrivi \"[quit]\" per uscire.'.encode("utf-8"))
+            client.send(f'Benvenuto {nickname}! \nSe vuoi lasciare la chat scrivi \"[quit]\".'.encode("utf-8"))
             # Messaggio brodcast con cui tutti i Client connessi alla chat vengono avvisati che l'utente è entrato
             broadcast(f'{nickname} si è unito alla chat!'.encode("utf-8"), clients)
             break
@@ -66,7 +76,7 @@ def handle(client):
                         print(nick) 
                     break
             else:
-                print("Ping arrived")
+                print("[System]: Client ping arrived")
 
         except timeout:
             print(f'{nickname} non è più connesso.')
@@ -98,6 +108,9 @@ def receive(server, clients, nicknames):
             # Diamo inizio all'attività di gestione dei Client mediante un Thread (uno per ogni Client)
             thread = Thread(target=handle, args=(client,))
             thread.start()
+            pingTrhead = Thread(target=ping, args=(client,))
+            pingTrhead.start()
+
         except Exception:
             print("Server disconnesso")
             break
@@ -118,13 +131,10 @@ nicknames = []
 
 if __name__ == "__main__":
     
-    #signal.signal(signal.SIGINT, signal_handler)
     acceptThread = Thread(target=receive, args=(serverSocket, clients, nicknames))
     acceptThread.start()
     print("In attesa di connessioni ...")
-    #acceptThread.join()
-    #serverSocket.close()
-    
+
     while True:
         try: 
             time.sleep(5)
@@ -133,6 +143,7 @@ if __name__ == "__main__":
             print("Avviata procedura di chiusura del Server ... (CTRL+C)")
             for client in clients:
                 client.send("Sei stato disconnesso a causa della chiusura inaspettata del Server".encode("utf-8"))
+                client.send("[quit]".encode("utf-8"))
                 client.close()
             print("Tutti i client sono stati disconnessi")
             serverSocket.close()

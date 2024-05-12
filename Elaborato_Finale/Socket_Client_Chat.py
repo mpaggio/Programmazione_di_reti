@@ -4,16 +4,25 @@ from socket import *
 from threading import *
 import tkinter as tk
 import time
+import sys
+
+# Variabile globale
+socket_open = True
 
 # Funzione che manda costantemente (ogni 3 secondi) un segnale al server:
 def ping(client):
+    global socket_open
     while True:
         try:
             # Aspetta per 3 secondi
             time.sleep(3)
-            # Invia il messaggio ping al server
-            client.send("[ping]".encode("utf-8"))
-            print(f"Sent ping")
+            if socket_open == True:
+                # Invia il messaggio ping al server
+                client.send("[ping]".encode("utf-8"))
+                print("[System]: Sent ping")
+            else:
+                 break
+            
         except:
              # Se c'è un errore (la connessione è interrota) allora si interrompe
              break
@@ -34,15 +43,32 @@ def send_message(event = None):
 
 # Funzione che gestisce la ricezione dei messaggi:
 def receive(client):
+    global socket_open
     while True:
             try:
-                message = client.recv(1024).decode("utf-8")
-                message_list.insert(tk.END, message + '\n')
-                print(message)
+                # Imposta un timeout di 10 secondi al Server
+                client.settimeout(10)
+                if socket_open == True:
+                    message = client.recv(1024).decode("utf-8")
+                    if "[ping]" not in message:
+                        message_list.insert(tk.END, message + '\n')
+                        print(message)
+                    else:
+                        print("[System]: Server ping received")
+                else:
+                     break
 
             # Controllo degli errori
+            except timeout:
+                socket_open = False
+                clientSocket.close()
+                print('Il Server non è più attivo quindi sei stato disconnesso')
+                window.quit() 
+                break
+
             except OSError:
-                print("Connessione terminata")
+                socket_open = False
+                print("Disconnessione in corso ...")
                 clientSocket.close()
                 window.quit()
                 break 
@@ -102,3 +128,5 @@ receiveThread.start()
 
 # Avvio l'esecuzione della finestra grafica della Chat
 window.mainloop()
+
+sys.exit(0)
