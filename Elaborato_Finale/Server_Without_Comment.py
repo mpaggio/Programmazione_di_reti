@@ -75,7 +75,7 @@ def handle(client, pingThread, indice):
                 print("[System]: Client ping arrived")
 
         except timeout:
-            print(f'{nickname} non è più connesso.')
+            print(f'{nickname[indice]} non è più connesso.')
             delete_client(client)
             break
 
