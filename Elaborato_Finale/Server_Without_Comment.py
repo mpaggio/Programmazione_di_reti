@@ -35,13 +35,17 @@ def broadcast(message, clients):
 
 
 def delete_client(client):
-    client.send("[quit]".encode("utf-8"))
-    index = clients.index(client)
-    clients.remove(client)
-    nickname = nicknames[index]
-    nicknames.remove(nickname)
-    print(f"Rimosso {nickname} dalla chat")
-    broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+    try:
+        client.send("[quit]".encode("utf-8"))
+        index = clients.index(client)
+        clients.remove(client)
+        nickname = nicknames[index]
+        nicknames.remove(nickname)
+        print(f"Rimosso {nickname} dalla chat")
+        broadcast(f'{nickname} ha lasciato la chat!'.encode("utf-8"), clients)
+    
+    except ConnectionResetError:
+        print("Azione non andata a buon fine perchè la socket è gia stata chiusa")
 
 
 def handle(client, pingThread, indice):
@@ -74,8 +78,8 @@ def handle(client, pingThread, indice):
             else:
                 print("[System]: Client ping arrived")
 
-        except timeout:
-            print(f'{nickname[indice]} non è più connesso.')
+        except TimeoutError:
+            print(f'{nicknames[indice]} non è più connesso.')
             delete_client(client)
             break
 
