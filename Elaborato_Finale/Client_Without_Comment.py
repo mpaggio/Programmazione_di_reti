@@ -121,7 +121,7 @@ connect_to_server(serverAddress)
 
 
 window = tk.Tk()
-window.title("Chat_Elaborato_Programmazione_di_Reti")
+window.title(f"Chat di {nickname}")
 window.configure(background="green")
 messages_frame = tk.Frame(window)
 scrollbar = tk.Scrollbar(messages_frame)

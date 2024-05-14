@@ -56,7 +56,7 @@ def handle(client, pingThread, indice):
                 break
             if "[ping]" not in message:
                 if message != "[quit]":
-                    total_message = nickname + ": " + message
+                    total_message = nicknames[indice] + ": " + message
                     broadcast(total_message.encode("utf-8"), clients)
                 else:
                     ping_thread_stop[indice] = 1
