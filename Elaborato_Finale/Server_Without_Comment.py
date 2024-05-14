@@ -24,7 +24,7 @@ def ping(client, indice):
             break
 
         except ConnectionAbortedError:
-            print("Tentativo di invio del ping su socket precedentemente chiusa, terminazione in corso ... ")
+            print("Tentativo di invio del ping su socket precedentemente chiusa, terminazione del thread ping in corso ... ")
             break
 
         except Exception as ex:
