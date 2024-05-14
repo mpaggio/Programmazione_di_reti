@@ -23,6 +23,10 @@ def ping(client, indice):
             print("Tentativo di ricezione su socket precedentemente chiusa, terminazione in corso ...")
             break
 
+        except ConnectionAbortedError:
+            print("Tentativo di invio del ping su socket precedentemente chiusa, terminazione in corso ... ")
+            break
+
         except Exception as ex:
             print(f'Problema rilevato: {ex}, chiusura in corso ...')
             traceback.print_exc()
