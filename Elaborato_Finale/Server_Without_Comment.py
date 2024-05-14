@@ -20,7 +20,7 @@ def ping(client, indice):
                 break
             
         except ConnectionResetError:
-            print("Tentativo di ricezione su socket precedentemente chiusa, terminazione in corso ...")
+            print("La connessione è stata interrotta in modo inaspettato, terminazione del thread ping in corso ...")
             break
 
         except ConnectionAbortedError:
@@ -88,12 +88,12 @@ def handle(client, pingThread, indice):
             break
 
         except ConnectionResetError:
-            print("Tentativo di ricezione su socket precedentemente chiusa, terminazione in corso ...")
+            print("Tentativo di ricezione su socket precedentemente chiusa, terminazione dell'handle thread in corso ...")
             break
             
 
         except Exception as ex:
-            print(f'Problema rilevato: {ex}, chiusura in corso ...')
+            print(f"Problema rilevato: {ex}, chiusura dell'handel thread in corso ...")
             traceback.print_exc()
             break
             
@@ -116,11 +116,11 @@ def receive(server, clients, nicknames):
             handleThread.start()
            
         except OSError:
-            print("Tentativo di accept su Socket chiusa, chiusura in corso ...")
+            print("Tentativo di accept su Socket chiusa, chiusura del thread receive in corso ...")
             break
 
         except Exception as ex: 
-            print(f'Problema rilevato: {ex}, chiusura in corso ...')
+            print(f'Problema rilevato: {ex}, chiusura del thread receive in corso ...')
             traceback.print_exc()
             break
 
